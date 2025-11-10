@@ -38,7 +38,7 @@ const result = await agent.sendMessage("Hello!");
 ## Multi-Agent Example
 
 ```typescript
-import { AgentBuilder } from "@artinet/sdk";
+import { AgentBuilder, getContent } from "@artinet/sdk";
 import { AIAgentBuilder } from "@artinet/a2a";
 
 // Create helper agents
@@ -47,7 +47,7 @@ const echoAgent = AgentBuilder()
   .createAgent({ agentCard: "EchoAgent" });
 
 const testAgent = AgentBuilder()
-  .text(({ content }) => "Hello, World!")
+  .text(({ content }) => "You have successfully reached the test agent.")
   .createAgent({ agentCard: "TestAgent" });
 
 // Expose them to your AI Agent
@@ -66,7 +66,19 @@ const aiAgent = AIAgentBuilder(
   .createAgent({ agentCard: "MainAgent" });
 
 // The AI agent can now call or be called by other A2A agents
-await aiAgent.sendMessage("Echo this message using the echo agent");
+console.log(
+  getContent(
+    await aiAgent.sendMessage("Call the test agent and tell me what it says")
+  )
+);
+```
+
+**Response:**
+
+```bash
+I have access to the test agent and sent a message to it. The test agent responded, saying:
+
+"You have successfully reached the test agent."
 ```
 
 ## API

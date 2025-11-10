@@ -23,7 +23,6 @@ import {
 } from "@a2a-js/sdk/server";
 import { convertExecutor } from "../src/index.js";
 jest.setTimeout(10000);
-
 class TestExecutor implements AgentExecutor {
   private cancelledTasks = new Set<string>();
   public async cancelTask(

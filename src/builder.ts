@@ -25,7 +25,6 @@ import {
   OutArgsOf,
   A2AService,
   A2AClient,
-  AgentBuilder,
   getContent,
 } from "@artinet/sdk";
 import { AgentRelayConfig, AgentType, AgentRelay } from "@artinet/agent-relay";
@@ -128,7 +127,7 @@ export function aiStep(
         includeContent: true,
         disableAgents: false,
       },
-      body = { model: "openai/gpt-4o", messages: [] },
+      body = { model: "gpt-4o-mini", messages: [] },
       options,
     } = stepArgs;
 
