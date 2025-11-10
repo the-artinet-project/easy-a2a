@@ -89,10 +89,6 @@ Adds an AI step to the agent workflow.
 - `body`: System prompt string or full `ChatCompletionCreateParams`
 - `options?`: Request options including `history`/`args`/`content` inclusion settings
 
-### `aiStep(stepArgs)`
-
-Creates a custom AI step with fine-grained control over execution.
-
 ### `convertExecutor(executor)`
 
 Converts an `AgentExecutor`(from @a2a-js/sdk) into an `AgentEngine`.
