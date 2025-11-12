@@ -11,7 +11,6 @@ The [Agent2Agent Protocol (A2A)](https://a2a-protocol.org/latest) is a standardi
 ```typescript
 import a2a, { Task, getContent } from "easy-a2a";
 
-const cooking_agent = a2a({apiKey: "your-api-key"}).ai("You are an assistant that makes recipe recommendations").createAgent(agentCard: "CookingAgent");
 const agent = a2a({
   baseURL: "https://your-api.com/api/v1",
   apiKey: "your-api-key",
