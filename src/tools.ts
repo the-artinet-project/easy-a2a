@@ -34,7 +34,6 @@ export function toolifyAgentInstance(agent: Agent) {
       name: "get-agent-card",
       parameters: z.object({}),
       function: async () => {
-        console.log("get-agent-card");
         return await agent.agentCard;
       },
       description:
@@ -44,7 +43,6 @@ export function toolifyAgentInstance(agent: Agent) {
       name: "tasks-get",
       parameters: z.object({
         id: z.string(),
-        historyLength: z.number().optional(),
       }),
       function: async (args: TaskQueryParams) => await agent.getTask(args),
       description:
@@ -81,7 +79,6 @@ export function toolifyClient(agent: A2AClient) {
       name: "tasks-get",
       parameters: z.object({
         id: z.string(),
-        historyLength: z.number().optional(),
       }),
       function: async (args: TaskQueryParams) => await agent.getTask(args),
       description:
@@ -121,7 +118,6 @@ export function toolifyAgentRelay(relay: AgentRelay) {
         agentId: z.string(),
         taskQuery: z.object({
           id: z.string(),
-          historyLength: z.number().optional().nullable(),
         }),
       }),
       function: async (args: GetRelayTaskRequest) => await relay.getTask(args),

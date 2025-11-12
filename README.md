@@ -1,18 +1,17 @@
 # easy-a2a
 
-**easy-a2a** makes building A2A agents simple.
+Turn any OpenAI-compatible API (OpenAI, HuggingFace, OpenRouter, local models, etc.) into an A2A agent.
 
-Build AI agents that can work together. Connect your agents to any [OpenAI-compatible API](https://github.com/openai/openai-openapi) (OpenAI, HuggingFace, OpenRouter, local models, etc.) and let them collaborate to solve tasks.
-
-**easy-a2a combines the A2A protocol with the OpenAI API speficication,** so you can quickly build AI assistants that can communicate with each other.
+No frills, frameworks or vendor lock-in.
 
 The [Agent2Agent Protocol (A2A)](https://a2a-protocol.org/latest) is a standardized way to send messages and share context between AI Agents.
 
 ## Quickstart
 
 ```typescript
-import a2a from "easy-a2a";
+import a2a, { Task, getContent } from "easy-a2a";
 
+const cooking_agent = a2a({apiKey: "your-api-key"}).ai("You are an assistant that makes recipe recommendations").createAgent(agentCard: "CookingAgent");
 const agent = a2a({
   baseURL: "https://your-api.com/api/v1",
   apiKey: "your-api-key",
@@ -22,7 +21,8 @@ const agent = a2a({
     agentCard: "MyAgent",
   });
 
-const result = await agent.sendMessage("Hello!");
+const result: Task = await agent.sendMessage("Hello!");
+console.log(getContent(result));
 ```
 
 ## Installation
