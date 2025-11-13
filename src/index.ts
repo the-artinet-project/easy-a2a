@@ -1,6 +1,6 @@
 import { AgentRelay, AgentRelayConfig, AgentType } from "@artinet/agent-relay";
 import OpenAI, { ClientOptions } from "openai";
-import { AIAgentBuilder } from "./builder.js";
+import { AIAgentBuilder, AgentArgs } from "./builder.js";
 
 export * from "@artinet/sdk";
 export * from "./builder.js";
@@ -93,7 +93,7 @@ export * from "./executor.js";
  */
 export default function a2a(
   client: OpenAI | ClientOptions,
-  agents?: AgentRelay | AgentRelayConfig | AgentType
+  agents?: AgentArgs
 ) {
   return AIAgentBuilder(client, agents);
 }

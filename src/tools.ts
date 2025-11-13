@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import {
-  TaskQueryParams,
   TaskIdParams,
   Agent,
   A2AClient,
@@ -43,8 +42,13 @@ export function toolifyAgentInstance(agent: Agent) {
       name: "tasks-get",
       parameters: z.object({
         id: z.string(),
+        historyLength: z.number().optional().nullable(),
       }),
-      function: async (args: TaskQueryParams) => await agent.getTask(args),
+      function: async (args: { id: string; historyLength?: number | null }) =>
+        await agent.getTask({
+          id: args.id,
+          historyLength: args.historyLength ?? undefined,
+        }),
       description:
         "Retrieve the current state of a task by passing its ID and optional history length",
     }),
@@ -79,8 +83,13 @@ export function toolifyClient(agent: A2AClient) {
       name: "tasks-get",
       parameters: z.object({
         id: z.string(),
+        historyLength: z.number().optional().nullable(),
       }),
-      function: async (args: TaskQueryParams) => await agent.getTask(args),
+      function: async (args: { id: string; historyLength?: number | null }) =>
+        await agent.getTask({
+          id: args.id,
+          historyLength: args.historyLength ?? undefined,
+        }),
       description:
         "Retrieve the current state of a task by passing its ID and optional history length",
     }),
@@ -121,6 +130,8 @@ export function toolifyAgentRelay(relay: AgentRelay) {
         }),
       }),
       function: async (args: GetRelayTaskRequest) => await relay.getTask(args),
+      description:
+        "Retrieve the current state of a task by passing the agentId and taskId. This will return the task state.",
     }),
     zodFunction({
       name: "relay-tasks-cancel",
@@ -132,20 +143,22 @@ export function toolifyAgentRelay(relay: AgentRelay) {
       }),
       function: async (args: CancelRelayTaskRequest) =>
         await relay.cancelTask(args),
+      description:
+        "Cancel a task by passing the agentId and taskId. This will cancel the task and return information about the cancelled task.",
     }),
     zodFunction({
       name: "relay-agents-get-card-all",
       parameters: z.object({}),
       function: async () => await relay.getAgentCards(),
       description:
-        "Get all the agent cards from the relay. This will return an array of AgentCard objects.",
+        "Get all the available agents from the relay. This will return an array of AgentCard objects which contain the name, description, skills, and other information about the available agents. Recommended to use this tool to get the names of the agents and their information before calling other tools.",
     }),
     zodFunction({
       name: "relay-agents-get-ids",
       parameters: z.object({}),
       function: async () => await relay.getAgentIds(),
       description:
-        "Get the ids of all the agents from the relay. This will return an array of strings.",
+        "Retrieve the ids of all the available agents which are registered with the relay. This will return an array of strings.",
     }),
     zodFunction({
       name: "relay-agents-search",
@@ -154,6 +167,8 @@ export function toolifyAgentRelay(relay: AgentRelay) {
       }),
       function: async (args: SearchRelayRequest) =>
         await relay.searchAgents(args),
+      description:
+        "Search for agents by name, description, or skills. The query is case insensitive and will match against the entire name, description, and skills of the agents.",
     }),
     zodFunction({
       name: "relay-agents-get-card",
@@ -163,7 +178,7 @@ export function toolifyAgentRelay(relay: AgentRelay) {
       function: async (args: AgentRelayRequest) =>
         await relay.getAgentCard(args),
       description:
-        "Get the agent card from the relay for the given agentId. This will return an AgentCard object.",
+        "Get the agent card from the relay for the given agentId. This will return an AgentCard object which contains the name, description, skills, and other information about the agent.",
     }),
   ];
 }

@@ -81,20 +81,22 @@ const client = new OpenAI({ apiKey: "your-api-key" });
 
 const cooking_agent = a2a(client)
   .ai("You're a helpful assistant that makes great cooking recomendations.")
-  .createAgent({ agentCard: "Cooking Agent" });
+  .createAgent({
+    agentCard: {
+      name: "Cooking Agent",
+      description: "An agent thats great at making cooking recomentations.",
+    },
+  });
 
 const hotel_agent = a2a(client)
   .ai("You are a helpful assistant that makes great hotel recomendations")
   .createAgent({ agentCard: "Hotel Agent" });
 
 // Build an agent that can call other agents
-const agent = a2a(client, {
-  callerId: "main-agent",
-  agents: new Map([
-    ["cooking-agent", cooking_agent],
-    ["hotel-agent", hotel_agent],
-  ]),
-})
+const agent = a2a(client, [
+  { name: "Cooking Agent", agent: cooking_agent },
+  { name: "Hotel Agent", agent: hotel_agent },
+])
   .ai("Use your agents to fulfill the users request.")
   .createAgent({ agentCard: "MainAgent" });
 
@@ -113,13 +115,19 @@ const agent = a2a({ apiKey: "your-api-key" })
   .text(({ content: userMessage })=> `Message Recieved: ${userMessage}`)
   .ai("Use the least amount of tokens to process the users.") // The ChatCompletion is passed to the next step
   .text(({ args, contextId })=> {
-    const completion = args[0];
+    const completion = args?.[0];
     if (completion.usage?.total_tokens > 1000) {
       return `You've run out of tokens for this request: ${contextId}`;
     }
     ...
   })
   .createAgent({ agentCard: "MyAgent" });
+
+//Stream the responses
+const stream = agent.streamMessage("Hello, World!");
+for await (const update of stream) {
+  console.log(getContent(update));
+}
 ```
 
 ---
@@ -155,6 +163,7 @@ Quickly turn your agent into an [`Express`](https://github.com/expressjs/express
 
 ```typescript
 import { createAgentServer } from "easy-a2a";
+import { agent } from "./my-agent.js";
 
 const { app } = createAgentServer({
   agent: agent,

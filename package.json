@@ -1,6 +1,6 @@
 {
   "name": "easy-a2a",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "An easy to use library for building Agent2Agent (A2A) agents backed by OpenAI APIs.",
   "type": "module",
   "main": "./dist/index.js",
@@ -30,16 +30,8 @@
   "keywords": [
     "agent2agent",
     "a2a",
-    "artinet",
     "ai",
-    "agent",
-    "sdk",
-    "artificial intelligence",
-    "ai agent",
-    "multi-agent",
-    "multi-agent system",
-    "orchestration",
-    "swarms"
+    "agent"
   ],
   "author": "artinet",
   "license": "Apache-2.0",

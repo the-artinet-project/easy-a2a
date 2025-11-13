@@ -31,7 +31,7 @@ import { AgentRelayConfig, AgentType, AgentRelay } from "@artinet/agent-relay";
 import openai, { ClientOptions, OpenAI } from "openai";
 import { toolifyAgents } from "./tools.js";
 import { Task } from "@a2a-js/sdk";
-
+import { v4 as uuidv4 } from "uuid";
 type AIClient = OpenAI;
 /**
  * @class AIStepArgs
@@ -67,7 +67,8 @@ function createSession(
   messages?: openai.ChatCompletionCreateParams["messages"],
   task?: Task,
   args?: readonly unknown[],
-  content?: string
+  content?: string,
+  agents?: boolean
 ) {
   const historicalMessages = task?.history
     ?.map((message) => {
@@ -94,11 +95,21 @@ function createSession(
   const contentMessage = content
     ? [{ role: "user" as const, content: content }]
     : [];
+  const agentsMessage = agents
+    ? [
+        {
+          role: "system" as const,
+          content:
+            "The assistant can call agents to help with the users request. Always get a list of the available agents/agent then use the agents whenever possible.",
+        },
+      ]
+    : [];
   const sessionMessages = [
     ...(messages ?? []),
     ...(historicalMessages ?? []),
     ...argumentsMessage,
     ...contentMessage,
+    ...agentsMessage,
   ];
   return sessionMessages;
 }
@@ -116,7 +127,10 @@ export function aiStep(
   TextPart["text"],
   readonly unknown[],
   readonly unknown[],
-  StepOutput<TextPart["text"]>
+  | StepOutput<TextPart["text"]>
+  | StepOutputWithForwardArgs<TextPart["text"], readonly unknown[]>
+  | Array<TextPart["text"]>
+  | TextPart["text"]
 > {
   return async (params: StepParams<MessageSendParams, readonly unknown[]>) => {
     const {
@@ -133,16 +147,16 @@ export function aiStep(
 
     let completion: openai.ChatCompletion | undefined;
 
+    const agentList = stepArgs.agents ? toolifyAgents(stepArgs.agents) : [];
     const messages = createSession(
       body?.messages,
       settings.includeHistory
         ? (params.context.State().task as Task)
         : undefined,
       settings.includeArgs ? params.args : undefined,
-      settings.includeContent ? params.content : undefined
+      settings.includeContent ? params.content : undefined,
+      agentList.length > 0 ? true : false
     );
-
-    const agentList = stepArgs.agents ? toolifyAgents(stepArgs.agents) : [];
 
     if (!agentList.length || settings.disableAgents) {
       completion = await client.chat.completions.create(
@@ -164,7 +178,7 @@ export function aiStep(
       completion = await runner.finalChatCompletion();
     }
     return {
-      parts: completion.choices[0].message.content ?? "",
+      parts: completion.choices[0].message.content ?? [],
       args: [completion],
     };
   };
@@ -312,15 +326,24 @@ export class OpenaiEngineBuilder<
   }
 }
 
-function createAgentArgs(
-  agents: AgentRelay | AgentRelayConfig | AgentType | undefined
-) {
+export type AgentArgs =
+  | AgentRelay
+  | AgentRelayConfig
+  | AgentType
+  | { name: string; agent: AgentType }[];
+
+function createAgentArgs(agents: AgentArgs | undefined) {
   if (agents === undefined) {
     return undefined;
   }
   let relay: AgentRelay | null = null;
   let agent: AgentType | undefined = undefined;
-  if (agents instanceof AgentRelay) {
+  if (Array.isArray(agents)) {
+    relay = new AgentRelay({
+      callerId: `multi-agent-${uuidv4()}`,
+      agents: new Map(agents.map((agent) => [agent.name, agent.agent])),
+    });
+  } else if (agents instanceof AgentRelay) {
     relay = agents;
   } else if (agents instanceof A2AService || agents instanceof A2AClient) {
     agent = agents;
@@ -343,7 +366,7 @@ function createAgentArgs(
  */
 export const AIAgentBuilder = (
   client: AIClient | ClientOptions,
-  agents?: AgentRelay | AgentRelayConfig | AgentType
+  agents?: AgentArgs
 ) => {
   return new OpenaiEngineBuilder(
     client instanceof OpenAI ? client : new OpenAI(client),
