@@ -192,7 +192,7 @@ Adds a step to the agents workflow that triggers a call to the target API.
 
 **Parameters:**
 
-- `body`: System prompt string or full `OpenAI.ChatCompletionCreateParams`
+- `body`: System prompt string or full `OpenAI.ChatCompletionCreateParamsNonStreaming`
 - `options?`: `OpenAI.RequestOptions` including the following flags for creating the `messages` array based to the llm:
   - `includeHistory`:`boolean`: Include the `Task.history` as `{ role: "assistant" | "user"; content: string; }[]`.
   - `includeArgs`:`boolean`: Include the `args` (see below) as `{ role: "system" as const, content: JSON.stringify(args) }`.
